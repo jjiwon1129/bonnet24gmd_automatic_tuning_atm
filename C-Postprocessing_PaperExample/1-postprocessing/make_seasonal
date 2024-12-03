@@ -1,0 +1,38 @@
+#!/bin/sh
+set -ex
+# this script merges all the monthly outputs of the ICON runs, and selects the years that should be analysed and averages the output on this time period
+
+echo "############################################"
+echo SCRIPT make_Seasonal
+echo "############################################"
+
+workdir=${WD_TMP_PROCESSED} #TODO Setup
+cd ${workdir}
+
+cdo -O mergetime ${EXP_DATA}/atm_amip_${ICON_GRID}_${EXP}_atm_2d_ml_*01T000000Z.nc atm_2d_ml_${EXPAna}_${ICON_GRID}.nc
+cdo -O mergetime ${EXP_DATA}/atm_amip_${ICON_GRID}_${EXP}_atm_3d_ml_*01T000000Z.nc atm_3d_ml_${EXPAna}_${ICON_GRID}.nc
+
+#3d
+#---ANN
+TYP=ANN
+NAME=EXP_${EXP}_${ICON_GRID}_POST_${YY1}-${YY2}_${TYP}_${Ana}
+cdo -setgrid,$gridinfofile -timavg -selyear,${YY1}/${YY2} -selvar,ta,ua,va,cl,cli,clw,hus,hur,zg,ps,pfull atm_3d_ml_${EXPAna}_${ICON_GRID}.nc  ${NAME}_atm_3d_ml.nc
+
+#---JJA
+TYP=JJA
+NAME=EXP_${EXP}_${ICON_GRID}_POST_${YY1}-${YY2}_${TYP}_${Ana}
+cdo -setgrid,$gridinfofile -timavg -selmon,6,7,8 -selyear,${YY1}/${YY2} -selvar,ta,ua,va,cl,cli,clw,hus,hur,zg,ps,pfull atm_3d_ml_${EXPAna}_${ICON_GRID}.nc  ${NAME}_atm_3d_ml.nc
+
+#2d
+#---ANN
+TYP=ANN
+NAME=EXP_${EXP}_${ICON_GRID}_POST_${YY1}-${YY2}_${TYP}_${Ana}
+cdo -setgrid,$gridinfofile -timavg -selyear,${YY1}/${YY2} atm_2d_ml_${EXPAna}_${ICON_GRID}.nc ${NAME}_atm_2d_ml.nc
+
+#---JJA
+TYP=JJA
+NAME=EXP_${EXP}_${ICON_GRID}_POST_${YY1}-${YY2}_${TYP}_${Ana}
+cdo -setgrid,$gridinfofile -timavg -selmon,6,7,8 -selyear,${YY1}/${YY2} atm_2d_ml_${EXPAna}_${ICON_GRID}.nc ${NAME}_atm_2d_ml.nc
+
+#exit
+

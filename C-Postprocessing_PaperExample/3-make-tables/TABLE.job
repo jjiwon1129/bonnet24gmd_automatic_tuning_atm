@@ -1,0 +1,243 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+NAME=$2
+#
+EXP=$3
+#
+DATDIR=$4
+#
+#this script defines the output variables
+#and runs another script table.ncl that creates a table with all the 2d output metric names, units andvalues
+
+echo TYP path $TYP
+echo DIR path $DATDIR
+echo QUELLE path $QUELLE
+echo PLTDIR path $PLTDIR
+
+
+atm_phy=busy_atm_phy
+cdo copy ${DATDIR}/${NAME}_atm_2d_ml.nc $atm_phy
+
+#
+#----rlnt   longwave, net, top (net=down-up) code179
+#    rlnt=rldt-rlut  rldt=0  rlnt=-rlut ----
+#
+Varname=rlnt
+if cdo -s showvar -selvar,${Varname}  $atm_phy > /dev/null
+then
+   cdo info -selvar,${Varname} $atm_phy 
+else
+##########if rlnt  doesn't exits ===> =-rlut ##########
+   if cdo -s showvar -selvar,rlut  $atm_phy > /dev/null
+   then
+      cdo aexpr,'rlnt=(-1)*rlut' $atm_phy busy
+      cdo copy busy $atm_phy
+#      cdo infon $atm_phy
+      rm busy
+    else
+      echo can not compute rlnt     rlut failed
+   fi
+fi
+
+#
+#----rsnt   solar, net, top (net=down-up) code178
+#    rsnt=rsdt-rsut  rsdt=code184 rsut=-code203
+#
+Varname=rsnt
+if cdo -s showvar -selvar,${Varname}  $atm_phy > /dev/null
+then
+   cdo info -selvar,${Varname} $atm_phy 
+else
+##########if rsnt  doesn't exits ===> rsdt-rsut ##########
+   if cdo -s showvar -selvar,rsut  $atm_phy > /dev/null
+   then
+      if cdo -s showvar -selvar,rsdt  $atm_phy > /dev/null
+      then
+         cdo aexpr,'rsnt=rsdt-rsut' $atm_phy busy
+         cdo copy busy $atm_phy
+#         cdo infon $atm_phy
+         rm busy
+       else
+         echo can not compute rsnt  rsdt failed
+      fi
+   else
+      echo can not compute rsnt     rsut  failed
+   fi
+fi
+
+#
+#----rsns  solar, net, surface (net=down-up) code176
+#    rsns=rsds-rsus  rsds=code176-code204 rsus=-code204
+#
+Varname=rsns
+if cdo -s showvar -selvar,${Varname}  $atm_phy > /dev/null
+then
+   cdo info -selvar,${Varname} $atm_phy 
+else
+##########if rsns  doesn't exits ===> rsds-rsus ##########
+   if cdo -s showvar -selvar,rsus  $atm_phy > /dev/null
+   then
+      if cdo -s showvar -selvar,rsds  $atm_phy > /dev/null
+      then
+         cdo aexpr,'rsns=rsds-rsus' $atm_phy busy
+         cdo copy busy $atm_phy
+#         cdo infon $atm_phy
+         rm busy
+      else
+         echo can not compute rsns  rsds failed
+      fi
+   else
+      echo can not compute rsns     rsus  failed
+   fi
+fi
+
+#
+#----rlns  longwave, net, surface (net=down-up) code177
+#    rlnt=rlds-rlus  rlds=code177-code205 rlus=-code205
+#
+Varname=rlns
+if cdo -s showvar -selvar,${Varname}  $atm_phy > /dev/null
+then
+   cdo info -selvar,${Varname} $atm_phy 
+else
+##########if rlns  doesn't exits ===> rlds-rlus ##########
+   if cdo -s showvar -selvar,rlus  $atm_phy > /dev/null
+   then
+      if cdo -s showvar -selvar,rlds  $atm_phy > /dev/null
+      then
+         cdo aexpr,'rlns=rlds-rlus' $atm_phy busy
+         cdo copy busy $atm_phy
+#         cdo infon $atm_phy
+         rm busy
+       else
+         echo can not compute rlns  rlds failed
+      fi
+   else
+      echo can not compute rsns     rlus  failed
+   fi
+fi
+#
+#----aprl    large scale precipitation
+#
+Varname=aprl
+if cdo -s showvar -selvar,${Varname}  $atm_phy > /dev/null
+then
+   cdo info -selvar,${Varname} $atm_phy 
+else
+##########if aprl  doesn't exits ===> prlr+prls ##########
+   if cdo -s showvar -selvar,prlr  $atm_phy > /dev/null
+   then
+      if cdo -s showvar -selvar,prls  $atm_phy > /dev/null
+      then
+         cdo aexpr,'aprl=prlr+prls' $atm_phy busy
+         cdo copy busy $atm_phy
+#         cdo infon $atm_phy
+         rm busy
+      else
+         echo can not compute rsns  prls failed
+      fi
+   else
+      echo can not compute rsns     prlr  failed
+   fi
+fi
+
+#
+#----aprl    large scale precipitation
+#
+Varname=aprc
+if cdo -s showvar -selvar,${Varname}  $atm_phy > /dev/null
+then
+   cdo info -selvar,${Varname} $atm_phy 
+else
+##########if aprl  doesn't exits ===> prcr+prcs ##########
+   if cdo -s showvar -selvar,prcr  $atm_phy > /dev/null
+   then
+      if cdo -s showvar -selvar,prcs  $atm_phy > /dev/null
+      then
+         cdo aexpr,'aprc=prcr+prcs' $atm_phy busy
+         cdo copy busy $atm_phy
+#         cdo infon $atm_phy
+         rm busy
+      else
+         echo can not compute rsns  prcs failed
+      fi
+   else
+      echo can not compute rsns     prcr  failed
+   fi
+fi
+#
+#---surface net engery flux  net_heat_flux=hfss+hfls+rsns+rlns
+#---rsns=rsds-rsus  net surface SW radiation
+#---rlns=rlds-rlus  net surface LW radiation
+#
+Varname=net_flux
+   if cdo -s showvar -selvar,hfss  $atm_phy  > /dev/null
+   then
+      if cdo -s showvar -selvar,hfls  $atm_phy  > /dev/null
+      then
+      if cdo -s showvar -selvar,rsns  $atm_phy  > /dev/null
+      then
+      if cdo -s showvar -selvar,rlns  $atm_phy > /dev/null
+      then
+         cdo aexpr,'net_flux=rsds-rsus+rlds-rlus+hfls+hfss'  $atm_phy busy
+         cdo copy busy $atm_phy   
+       else
+         echo can not compute  net_flux rsns failed
+      fi
+       else
+         echo can not compute  net_flux rlns failed
+      fi
+       else
+         echo can not compute  net_flux hfls failed
+      fi
+   else
+      echo can not compute net_flux  hfss failed
+   fi
+
+#
+#--- TOA net SW cloud forcing code178-code187=code191 sclf0=(rsdt-rsut)-(rsdt-rsutcs)= rsutcs-rsut
+#
+Varname=sclf0
+if cdo -s showvar -selvar,rsut $atm_phy > /dev/null 
+then
+if cdo -s showvar -selvar,rsutcs $atm_phy > /dev/null 
+then
+  cdo aexpr,'sclf0=rsutcs-rsut' $atm_phy busy
+  cdo copy busy $atm_phy   
+fi
+fi
+
+
+#---p-e   
+#
+Cvar=P_E
+if cdo -s showvar -selvar,pr $atm_phy > /dev/null 
+then
+if cdo -s showvar -selvar,evspsbl $atm_phy > /dev/null 
+then
+  cdo -aexpr,'P_E= pr+evspsbl' $atm_phy busy
+  cdo copy busy $atm_phy
+fi
+fi
+
+cdo copy  $atm_phy busy_atm_phy.nc
+source /etc/profile.d/modules.sh #added by Pauline B 06.09.2024
+module load ncl #added by Pauline B 29.08.2022
+nclsh ${QUELLE}/table.ncl -pltdir=${PLTDIR} -quelle=${QUELLE}
+
+which ncl
+module load enscript #added by Pauline B. on 29.08.2022
+  enscript -fCourier8 busy_table.txt --output=busy_ps.ps busy_table.txt
+module load ghostscript #added by Pauline B. on 29.08.2022
+ps2pdf    busy_ps.ps table_${NAME}.pdf
+
+rm busy*
+
+#
+
+
+
+exit

@@ -1,0 +1,47 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+NAME=$2
+#
+EXP=$3
+#
+DATDIR=$4
+#
+SCRIPTS_FOLDER=$5
+#
+#this script defines the output variables
+#and runs another script table.ncl that creates a table with all the 2d output metric names, units andvalues
+
+echo TYP path $TYP
+echo DIR path $DATDIR
+echo QUELLE path $QUELLE
+echo PLTDIR path $PLTDIR
+echo SCRIPTS_FOLDER path $SCRIPTS_FOLDER
+
+
+atm_phy=busy_atm_phy
+cdo copy ${DATDIR}/${NAME}_atm_2d_ml.nc $atm_phy
+
+cdo copy $atm_phy busy_atm_sea_ini.nc #added by Pauline B 10.05.2023
+echo 'Coucou'
+echo $PWD
+#cp ${SCRIPTS_FOLDER}/3-make-tables/NAO.txt $PWD
+cdo fldmean -selregion,${SCRIPTS_FOLDER}/3-make-tables/NAO.txt busy_atm_sea_ini.nc busy_atm_phy.nc #added by Pauline B on 16.08.2023
+source /etc/profile.d/modules.sh #added by Pauline B 06.09.2024
+module load ncl #added by Pauline B 29.08.2022
+nclsh ${QUELLE}/table_tauu_region.ncl -pltdir=${PLTDIR} -quelle=${QUELLE}
+which ncl
+module load enscript #added by Pauline B. on 29.08.2022
+  enscript -fCourier8 -o busy_ps.ps busy_table.txt #Pauline B 11.05.2023
+module load ghostscript #added by Pauline B. on 29.08.2022
+ps2pdf     busy_ps.ps table_${NAME}.pdf #Pauline B 11.05.2023
+
+rm busy*
+#rm NAO.txt
+#
+
+
+
+exit
