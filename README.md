@@ -67,3 +67,7 @@ Using the sampling selected at step 4-, run an ICON PPE in step 2 and continue t
 ## Licensing
 This code is under Creative Commons Attribution 4.0 International 
 
+## Cite the code
+[![DOI](https://zenodo.org/badge/895983436.svg)](https://doi.org/10.5281/zenodo.14267202)
+
+
