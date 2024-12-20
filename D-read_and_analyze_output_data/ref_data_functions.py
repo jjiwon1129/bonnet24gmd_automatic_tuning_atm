@@ -113,7 +113,7 @@ def Ref_clt():
     #CLARA_AVHRR
     #clt
     #mean
-    ref_Clt_CLARA_AVHRR=np.mean(netCDF4.Dataset('REFERENCE_DATA/CLARA-AVHRR/test1986-1995/OBS_CLARA-AVHRR_sat_V002_01_Amon_clt_1986-1995_fldmean_timavg.nc')['clt'])# in %
+    ref_Clt_CLARA_AVHRR=np.mean(netCDF4.Dataset('REFERENCE_DATA/CLARA-AVHRR/OBS_CLARA-AVHRR_sat_V002_01_Amon_clt_1986-1995_fldmean_timavg.nc')['clt'])# in %
 
     #std
     datafile='REFERENCE_DATA/OBS_CLARA-AVHRR_sat_V002_01_Amon_clt_198201-199112_fldmean_timstd.nc'
